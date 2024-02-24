@@ -5,6 +5,7 @@ import uuid
 from fastapi import APIRouter, HTTPException, UploadFile, Request
 from PIL import Image
 from transformers import AutoProcessor, BlipForConditionalGeneration
+from typing import Optional
 
 router = APIRouter(prefix="/message", tags=["Message"])
 
@@ -36,7 +37,9 @@ async def image_captioning(
 
     image = Image.open(file_location)
     pixel_values = processor(images=image, return_tensors="pt").pixel_values
-    input_ids = model.generate(pixel_values=pixel_values, max_length=32)
+    input_ids = model.generate(
+        pixel_values=pixel_values, max_length=32, skip_special_tokens=True
+    )
     generate_text = processor.decode(input_ids[0])
     audio_file_path = text2speech.convert_text_to_speech(
         message=generate_text,
@@ -52,3 +55,22 @@ async def image_captioning(
         "audio_url": storage.child(f"audios/{new_file_name}.mp3").get_url(None),
         "caption": generate_text,
     }
+
+
+@router.post("/text")
+async def real_time_chat(
+    message: Optional[str],
+    sent_time: Optional[str],
+    user_id: Optional[str],
+    request: Request,
+):
+    return {"message": message, "sent_time": sent_time, "user_id": user_id}
+
+
+@router.get("/history")
+async def get_chat_history(
+    first_user_id: Optional[str],
+    second_user_id: Optional[str],
+    request: Request,
+):
+    return {"message": "Chat history"}
