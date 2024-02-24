@@ -10,6 +10,7 @@ from app.routers import auth, message
 from app.modules.image_captioning import ImageCaptioning
 from app.modules.text_to_speech import TextToSpeech
 from app.modules.speech_to_text import SpeechToText
+from app.utils.userdatabase import UserDatabase
 
 load_dotenv()
 app = FastAPI()
@@ -38,6 +39,7 @@ firebase = pyrebase.initialize_app(firebaseConfig)
 app.authenticator = firebase.auth()
 app.storage = firebase.storage()
 app.database = firebase.database()
+app.user_database = UserDatabase(app.database)
 app.image_captioning = ImageCaptioning(model_name=os.getenv("IMAGE_CAPTIONING_MODEL"))
 app.text_to_speech = TextToSpeech()
 app.speech_to_text = SpeechToText()
