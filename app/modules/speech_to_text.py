@@ -1,5 +1,6 @@
-import speech_recognition as sr
 from typing import Optional
+
+import speech_recognition as sr
 
 
 class SpeechToText:
