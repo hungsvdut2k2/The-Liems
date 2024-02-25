@@ -1,6 +1,7 @@
 import os
 import pathlib
 import uuid
+from pydub import AudioSegment
 
 from fastapi import APIRouter, HTTPException, UploadFile, Request
 from PIL import Image
@@ -57,20 +58,33 @@ async def image_captioning(
     }
 
 
-@router.post("/text")
-async def real_time_chat(
-    message: Optional[str],
-    sent_time: Optional[str],
-    user_id: Optional[str],
+@router.post("/audio")
+async def speech_to_text(
+    audio: UploadFile,
     request: Request,
 ):
-    return {"message": message, "sent_time": sent_time, "user_id": user_id}
+    file_extension = pathlib.Path(audio.filename).suffix
+    storage = request.app.storage
+    speech2text = request.app.speech_to_text
+    if file_extension.lower() not in [".mp3"]:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid file format. Please upload a MP3 file.",
+        )
+    new_file_name = str(uuid.uuid4())
 
+    file_location = f"./audios/{new_file_name}.mp3"
 
-@router.get("/history")
-async def get_chat_history(
-    first_user_id: Optional[str],
-    second_user_id: Optional[str],
-    request: Request,
-):
-    return {"message": "Chat history"}
+    os.makedirs("./audios", exist_ok=True)
+    with open(file_location, "wb+") as file_object:
+        file_object.write(audio.file.read())
+
+    wav_file_location = f"./audios/{new_file_name}.wav"
+    sound = AudioSegment.from_mp3(file_location)
+    sound.export(wav_file_location, format="wav")
+    text = speech2text.convert_speech_to_text(wav_file_location)
+    storage.child(f"audios/{new_file_name}.mp3").put(file_location)
+    return {
+        "text": text,
+        "url": storage.child(f"audios/{new_file_name}.mp3").get_url(None),
+    }
