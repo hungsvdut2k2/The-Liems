@@ -38,10 +38,8 @@ async def image_captioning(
 
     image = Image.open(file_location)
     pixel_values = processor(images=image, return_tensors="pt").pixel_values
-    input_ids = model.generate(
-        pixel_values=pixel_values, max_length=32, skip_special_tokens=True
-    )
-    generate_text = processor.decode(input_ids[0])
+    input_ids = model.generate(pixel_values=pixel_values, max_length=32)
+    generate_text = processor.decode(input_ids[0], skip_special_tokens=True)
     audio_file_path = text2speech.convert_text_to_speech(
         message=generate_text,
         language="en",

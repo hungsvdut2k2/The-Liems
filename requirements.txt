@@ -10,3 +10,5 @@ SpeechRecognition==3.10.1
 pyrebase4==4.7.1
 python-dotenv==1.0.1
 pydub==0.25.1
+fuzzywuzzy==0.18.0
+python-Levenshtein==0.25.0

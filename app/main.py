@@ -6,7 +6,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
-from app.routers import auth, message
+from app.routers import auth, message, contact
 from app.modules.image_captioning import ImageCaptioning
 from app.modules.text_to_speech import TextToSpeech
 from app.modules.speech_to_text import SpeechToText
@@ -44,6 +44,7 @@ app.speech_to_text = SpeechToText()
 
 app.include_router(auth.router)
 app.include_router(message.router)
+app.include_router(contact.router)
 
 
 @app.get("/")
